@@ -7,11 +7,12 @@ import com.skilldistillery.filmquery.database.DatabaseAccessor;
 import com.skilldistillery.filmquery.database.DatabaseAccessorObject;
 import com.skilldistillery.filmquery.entities.Actor;
 import com.skilldistillery.filmquery.entities.Film;
+import com.skilldistillery.filmquery.entities.Language;
 
 public class FilmQueryApp {
 
 	DatabaseAccessor db = new DatabaseAccessorObject();
-
+	
 	public static void main(String[] args) {
 		FilmQueryApp app = new FilmQueryApp();
 		app.makeSelection();
@@ -30,31 +31,42 @@ public class FilmQueryApp {
 			System.out.println("The number provided was not valid. Please select a valid option");
 			makeSelection();
 		}
-		// startUserInterface(input);
 		input.close();
 	}
 
 	private void implementSelection(Scanner input, String selection) {
 
 		DatabaseAccessorObject dbAccess = new DatabaseAccessorObject();
-		int id;
+		String id = "";
 
 		if (selection.equals("1")) {
 			// Select a Film by the film ID
 			System.out.print("Please select a Film by the film ID: ");
-			id = input.nextInt();
+			if (input.hasNextInt()) {
+				id = input.nextLine();
+			}
+			else {
+				System.out.println("Invalid ID. It must be an integer.");
+				input = new Scanner(System.in);
+				implementSelection(input, selection);
+				return;
+			}
 
 			// Verify if result was returned
 			Film film = dbAccess.getFilmById(id);
+			Language l = dbAccess.getLanguageById(id);
+			List<Actor> actors = dbAccess.getActorsByFilmId(id);
 			if (film == null) {
-				System.out.println("The film ID provided was not valid");
+				System.out.println("The film ID provided did not return a match");
 				implementSelection(input, selection);
 			}
 			// Print film results
 			else {
-				System.out.println("\nBelow is the information for the selected Film");
+				System.out.println("\nBelow is the information for the selected Film(s)");
 				System.out.println("Film Title: " + film.getTitle() + " | Year: " + film.getRelease_year()
-						+ " | Rating: " + film.getRating() + " | Description: " + film.getDescription() + "\n");
+						+ " | Rating: " + film.getRating() + " | Description: " + film.getDescription() + 
+						" | Language: " + l.getLanguage());
+				System.out.println("The actors in this film are " + actors.toString());
 			}
 
 		} else if (selection.equals("2")) {
@@ -62,39 +74,20 @@ public class FilmQueryApp {
 			String text = input.nextLine();
 
 			// Verify if result was returned
-			Film film = dbAccess.getFilmBySearchKeyword(text);
-			if (film == null) {
-				System.out.println("The film ID provided was not valid");
-				implementSelection(input, selection);
-			}
-			// Print film results
-			else {
+			List<Film> films = dbAccess.getFilmBySearchKeyword(text);
+			if (films.size() == 0) {
+				System.out.print("There were no films that matched that keyword");
+			} else {
 				System.out.println("\nBelow is the information for the selected Film");
-				System.out.println("Film Title: " + film.getTitle() + " | Year: " + film.getRelease_year()
-						+ " | Rating: " + film.getRating() + " | Description: " + film.getDescription() + "\n");
+				for (Film f : films) {
+					Language l = db.getLanguageById(Integer.toString(f.getId()));
+					List<Actor> actors = dbAccess.getActorsByFilmId(Integer.toString(f.getId()));
+					System.out.println("Film Title: " + f.getTitle() + " | Year: " + f.getRelease_year() + " | Rating: "
+							+ f.getRating() + " | Description: " + f.getDescription() + " | Language: " + l.getLanguage());
+					System.out.println("The actors in this film are " + actors.toString() + "\n");
+				}
 			}
 		}
-		/*
-		 * // Select an Actor by their ID
-		 * System.out.print("Please select an Actor by their ID: "); id =
-		 * input.nextInt();
-		 * 
-		 * // Print actor results
-		 * System.out.println("\nBelow is the information for the selected Actor");
-		 * System.out.println(dbAccess.getActorById(id) + "\n");
-		 * 
-		 * 
-		 * 
-		 * // Get Actors by Film ID
-		 * System.out.print("Please select a Film ID to obtain a list of actors: "); id
-		 * = input.nextInt();
-		 * 
-		 * // Print Actors by Film ID results System.out.
-		 * println("\nBelow is the information for the actors by the Film ID " + id);
-		 * List<Actor> actorList = dbAccess.getActorsByFilmId(id); int count = 1; for
-		 * (Actor a : actorList) { System.out.println("Actor " + count++ + ": " +
-		 * a.toString()); }
-		 */
 	}
 
 	public String userMenu(Scanner input) {

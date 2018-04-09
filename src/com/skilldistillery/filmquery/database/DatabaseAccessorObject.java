@@ -10,6 +10,7 @@ import java.util.List;
 
 import com.skilldistillery.filmquery.entities.Actor;
 import com.skilldistillery.filmquery.entities.Film;
+import com.skilldistillery.filmquery.entities.Language;
 
 public class DatabaseAccessorObject implements DatabaseAccessor {
 
@@ -29,13 +30,14 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 	}
 
 	@Override
-	public Film getFilmById(int filmId) {
+	public Film getFilmById(String filmId) {
 		Film film = null;
 		try {
 			String sql = "SELECT * FROM film WHERE id = ?";
 			Connection conn = DriverManager.getConnection(URL2, user, pass);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, filmId);
+			int fID = Integer.parseInt(filmId);
+			stmt.setInt(1, fID);
 			ResultSet rs = stmt.executeQuery();
 
 			if (rs.next()) {
@@ -55,13 +57,14 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 	}
 
 	@Override
-	public Actor getActorById(int actorId) {
+	public Actor getActorById(String actorId) {
 		Actor actor = null;
 		try {
 			String sql = "SELECT * FROM actor WHERE id = ?";
 			Connection conn = DriverManager.getConnection(URL2, user, pass);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, actorId);
+			int aID = Integer.parseInt(actorId);
+			stmt.setInt(1, aID);
 			ResultSet rs = stmt.executeQuery();
 
 			if (rs.next()) {
@@ -78,7 +81,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 	}
 
 	@Override
-	public List<Actor> getActorsByFilmId(int filmId) {
+	public List<Actor> getActorsByFilmId(String filmId) {
 		List<Actor> actorsByFilmId = null;
 
 		try {
@@ -86,7 +89,8 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 					+ "ON a.id = fa.actor_id JOIN film f ON fa.film_id = f.id WHERE f.id = ?";
 			Connection conn = DriverManager.getConnection(URL2, user, pass);
 			PreparedStatement stmt = conn.prepareStatement(sql);
-			stmt.setInt(1, filmId);
+			int fID = Integer.parseInt(filmId);
+			stmt.setInt(1, fID);
 			ResultSet rs = stmt.executeQuery();
 
 			actorsByFilmId = new ArrayList<>();
@@ -100,16 +104,17 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			conn.close();
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return actorsByFilmId;
 	}
 
 	@Override
-	public Film getFilmBySearchKeyword(String keyword) {
-		Film film = null;
-		List<Film> films = new ArrayList<>();
+	public List<Film> getFilmBySearchKeyword(String keyword) {
+		
+		List<Film> films = null;
+		//List<Language> languages = null;
+		//List<Actor> actors = null;
 		String newKW;
 		try {
 			String sql = "SELECT * FROM film WHERE title LIKE ?";
@@ -119,10 +124,15 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			stmt.setString(1, newKW);
 			ResultSet rs = stmt.executeQuery();
 
-			if (rs.next()) {
-				film = new Film(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5),
+			films = new ArrayList<>();
+			//languages = new ArrayList<>();
+			//actors = new ArrayList<>();
+			while (rs.next()) {
+				Film film = new Film(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5),
 						rs.getInt(6), rs.getDouble(7), rs.getInt(8), rs.getDouble(9), rs.getString(10),
 						rs.getString(11));
+				//Language l = new Language()
+				films.add(film);
 			}
 			rs.close();
 			stmt.close();
@@ -132,7 +142,33 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			e.printStackTrace();
 		}
 
-		return film;
+		return films;
+	}
+
+	@Override
+	public Language getLanguageById(String filmId) {
+		Language l = null;
+		try {
+			String sql = "SELECT l.id, l.name FROM film f JOIN language l ON f.language_id = l.id WHERE f.id = ?";
+			Connection conn = DriverManager.getConnection(URL2, user, pass);
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			int fID = Integer.parseInt(filmId);
+			stmt.setInt(1, fID);
+			ResultSet rs = stmt.executeQuery();
+
+			if (rs.next()) {
+				l = new Language(rs.getInt(1), rs.getString(2));
+			}
+			rs.close();
+			stmt.close();
+			conn.close();
+
+		} catch (SQLException e) {
+			//e.printStackTrace();
+			return l;
+		}
+
+		return l;
 	}
 
 }
