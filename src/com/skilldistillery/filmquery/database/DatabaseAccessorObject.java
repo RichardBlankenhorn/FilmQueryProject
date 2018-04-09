@@ -113,8 +113,6 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 	public List<Film> getFilmBySearchKeyword(String keyword) {
 		
 		List<Film> films = null;
-		//List<Language> languages = null;
-		//List<Actor> actors = null;
 		String newKW;
 		try {
 			String sql = "SELECT * FROM film WHERE title LIKE ?";
@@ -125,13 +123,10 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			ResultSet rs = stmt.executeQuery();
 
 			films = new ArrayList<>();
-			//languages = new ArrayList<>();
-			//actors = new ArrayList<>();
 			while (rs.next()) {
 				Film film = new Film(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4), rs.getInt(5),
 						rs.getInt(6), rs.getDouble(7), rs.getInt(8), rs.getDouble(9), rs.getString(10),
 						rs.getString(11));
-				//Language l = new Language()
 				films.add(film);
 			}
 			rs.close();
@@ -164,8 +159,7 @@ public class DatabaseAccessorObject implements DatabaseAccessor {
 			conn.close();
 
 		} catch (SQLException e) {
-			//e.printStackTrace();
-			return l;
+			e.printStackTrace();
 		}
 
 		return l;
