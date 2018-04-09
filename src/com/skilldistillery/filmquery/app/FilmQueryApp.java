@@ -18,6 +18,7 @@ public class FilmQueryApp {
 		app.makeSelection();
 	}
 
+	// Prompt user to make a selection from the given menu
 	private void makeSelection() {
 		Scanner input = new Scanner(System.in);
 		String selection = userMenu(input);
@@ -45,6 +46,7 @@ public class FilmQueryApp {
 			if (input.hasNextInt()) {
 				id = input.nextLine();
 			}
+			// Return message if film ID invalid. Ask user to select again
 			else {
 				System.out.println("Invalid ID. It must be an integer.");
 				input = new Scanner(System.in);
@@ -77,8 +79,9 @@ public class FilmQueryApp {
 			List<Film> films = dbAccess.getFilmBySearchKeyword(text);
 			if (films.size() == 0) {
 				System.out.print("There were no films that matched that keyword");
+			// Print results
 			} else {
-				System.out.println("\nBelow is the information for the selected Film");
+				System.out.println("\nBelow is the information for the selected Films");
 				for (Film f : films) {
 					Language l = db.getLanguageById(Integer.toString(f.getId()));
 					List<Actor> actors = dbAccess.getActorsByFilmId(Integer.toString(f.getId()));
@@ -90,6 +93,7 @@ public class FilmQueryApp {
 		}
 	}
 
+	// Present a user menu to the user and allow user to make a selection
 	public String userMenu(Scanner input) {
 		System.out.println("Please select from the following options:\n1. Look up a film by its ID\n2. "
 				+ "Look up a film by a search keyword\n3. Exit the application");
